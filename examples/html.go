@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/mbertschler/blocks/html"
-	"github.com/mbertschler/blocks/html/attr"
+	"github.com/mbertschler/html"
+	"github.com/mbertschler/html/attr"
 )
 
 func main() {

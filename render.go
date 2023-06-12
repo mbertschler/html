@@ -7,7 +7,7 @@ import (
 	"html/template"
 	"io"
 
-	"github.com/mbertschler/blocks/html/attr"
+	"github.com/mbertschler/html/attr"
 )
 
 type UnsafeString string

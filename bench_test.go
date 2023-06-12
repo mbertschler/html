@@ -8,7 +8,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/mbertschler/blocks/html/attr"
+	"github.com/mbertschler/html/attr"
 )
 
 func TestHTMLTemplate(t *testing.T) {

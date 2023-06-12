@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/mbertschler/blocks/html"
+	"github.com/mbertschler/html"
 )
 
 func main() {
