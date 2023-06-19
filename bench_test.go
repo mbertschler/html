@@ -2,8 +2,8 @@ package html_test
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"testing"
 
@@ -12,34 +12,43 @@ import (
 )
 
 func TestHTMLTemplate(t *testing.T) {
-	renderTemplate(false)
+	buf := &bytes.Buffer{}
+	renderTemplate(buf)
 }
 
 func BenchmarkHTMLTemplate(b *testing.B) {
+	buf := &bytes.Buffer{}
 	for i := 0; i < b.N; i++ {
-		renderTemplate(false)
+		renderTemplate(buf)
+		buf.Reset()
 	}
 }
 
 func TestBlocks(t *testing.T) {
-	renderBlocks(false)
+	buf := &bytes.Buffer{}
+	renderBlocks(buf)
+
 }
 
 func BenchmarkBlocks(b *testing.B) {
+	buf := &bytes.Buffer{}
 	for i := 0; i < b.N; i++ {
-		renderBlocks(false)
+		renderBlocks(buf)
+		buf.Reset()
 	}
 }
 
 func BenchmarkBlockTemplates(b *testing.B) {
+	buf := &bytes.Buffer{}
 	for i := 0; i < b.N; i++ {
-		renderBlockTemplates(false)
+		renderBlockTemplates(buf)
+		buf.Reset()
 	}
 }
 
 var t *template.Template
 
-func renderTemplate(print bool) {
+func renderTemplate(w io.Writer) {
 	const tpl = `
 <!DOCTYPE html>
 <html>
@@ -69,8 +78,8 @@ func renderTemplate(print bool) {
 			"My blog",
 		},
 	}
-	var out = &bytes.Buffer{}
-	err = t.Execute(out, data)
+
+	err = t.Execute(w, data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,12 +92,9 @@ func renderTemplate(print bool) {
 		Items: []string{},
 	}
 
-	err = t.Execute(out, noItems)
+	err = t.Execute(w, noItems)
 	if err != nil {
 		log.Fatal(err)
-	}
-	if print {
-		fmt.Println(out.String())
 	}
 }
 
@@ -152,7 +158,7 @@ func TestTemplate(t *testing.T) {
 	}
 }
 
-func renderBlocks(print bool) {
+func renderBlocks(w io.Writer) {
 	type Data struct {
 		Title string
 		Items []string
@@ -179,7 +185,6 @@ func renderBlocks(print bool) {
 		}
 	}
 
-	var out = &bytes.Buffer{}
 	data := Data{
 		Title: "My page",
 		Items: []string{
@@ -187,7 +192,7 @@ func renderBlocks(print bool) {
 			"My blog",
 		},
 	}
-	err := html.RenderMinified(out, blocks(data))
+	err := html.RenderMinified(w, blocks(data))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -197,16 +202,13 @@ func renderBlocks(print bool) {
 		Items: []string{},
 	}
 
-	err = html.RenderMinified(out, blocks(noItems))
+	err = html.RenderMinified(w, blocks(noItems))
 	if err != nil {
 		log.Fatal(err)
 	}
-	if print {
-		fmt.Println(out.String())
-	}
 }
 
-func renderBlockTemplates(print bool) {
+func renderBlockTemplates(w io.Writer) {
 	template := NewTemplate()
 	type Data struct {
 		Title string
@@ -225,7 +227,6 @@ func renderBlockTemplates(print bool) {
 		return template.Render(d.Title, rows)
 	}
 
-	var out = &bytes.Buffer{}
 	data := Data{
 		Title: "My page",
 		Items: []string{
@@ -233,7 +234,7 @@ func renderBlockTemplates(print bool) {
 			"My blog",
 		},
 	}
-	err := html.RenderMinified(out, blocks(data))
+	err := html.RenderMinified(w, blocks(data))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -243,11 +244,8 @@ func renderBlockTemplates(print bool) {
 		Items: []string{},
 	}
 
-	err = html.RenderMinified(out, blocks(noItems))
+	err = html.RenderMinified(w, blocks(noItems))
 	if err != nil {
 		log.Fatal(err)
-	}
-	if print {
-		fmt.Println(out.String())
 	}
 }
