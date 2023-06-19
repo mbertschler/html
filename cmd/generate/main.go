@@ -20,7 +20,7 @@ func generateElements() {
 		log.Fatal(err)
 	}
 
-	file, err := os.Create("html/elements_gen.go")
+	file, err := os.Create("./elements_gen.go")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,7 +66,7 @@ func generateAttributes() {
 		log.Fatal(err)
 	}
 
-	file, err := os.Create("html/attr/attributes_gen.go")
+	file, err := os.Create("./attr/attributes_gen.go")
 	if err != nil {
 		log.Fatal(err)
 	}

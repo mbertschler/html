@@ -1,3 +1,4 @@
+//go:generate go run ./cmd/generate
 package html
 
 import "github.com/mbertschler/html/attr"
