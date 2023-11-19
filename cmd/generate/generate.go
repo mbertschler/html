@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/mbertschler/html"
+	"github.com/mbertschler/html/cmd/internal"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func generateElements() {
 	defer file.Close()
 
 	data := []elementTemplateData{}
-	for _, element := range elements {
+	for _, element := range internal.Elements {
 		option := elementOptions[element.Option]
 		if option == "" {
 			log.Fatalf("unknown option %d for element %s", element.Option, element.Name)
@@ -73,7 +74,7 @@ func generateAttributes() {
 	defer file.Close()
 
 	data := []attributeTemplateData{}
-	for _, attribute := range attributes {
+	for _, attribute := range internal.Attributes {
 		data = append(data, attributeTemplateData{
 			FuncName: funcName(attribute.Name),
 			AttrName: attribute.Name,
