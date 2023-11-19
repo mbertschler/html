@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mbertschler/html/cmd/internal"
 	"golang.org/x/net/html"
 )
 
@@ -19,22 +20,37 @@ var testInput = `<!DOCTYPE html>
 		<h1>This is a Heading</h1>
 		<p>This is a paragraph.</p>
 
-		<p>Links:</p>
+		<p data-test="yes">Links:</p>
 		<ul>
 			<li>
 				<a href="foo">Foo</a>
 			<li>
 				<a href="/bar/baz">BarBaz</a>
 		</ul>
+		<custom-element custom-attribute="a"></custom-element>
 	</body>
 </html>`
+
+var (
+	elementsMap   = map[string]bool{}
+	attributesMap = map[string]bool{}
+)
+
+func initMaps() {
+	for _, element := range internal.Elements {
+		elementsMap[element.Name] = true
+	}
+	for _, attribute := range internal.Attributes {
+		attributesMap[attribute.Name] = true
+	}
+}
 
 func main() {
 	doc, err := html.Parse(strings.NewReader(testInput))
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	initMaps()
 	handleNode(os.Stdout, doc)
 }
 
@@ -83,7 +99,7 @@ func handleElement(w io.Writer, n *html.Node) {
 	case html.DocumentNode:
 		fmt.Fprintf(w, "html.Blocks{\n")
 	case html.ElementNode:
-		fmt.Fprintf(w, "html.Element(%q, ", n.Data)
+		writeOpenTag(w, n.Data)
 		first := true
 		if len(n.Attr) > 0 {
 			for _, a := range n.Attr {
@@ -91,7 +107,7 @@ func handleElement(w io.Writer, n *html.Node) {
 					fmt.Fprintf(w, "attr")
 					first = false
 				}
-				fmt.Fprintf(w, ".Attr(%q, %q)", a.Key, a.Val)
+				writeAttr(w, a)
 			}
 		} else {
 			fmt.Fprintf(w, "nil")
@@ -116,4 +132,28 @@ func handleElement(w io.Writer, n *html.Node) {
 		}
 		fmt.Fprintf(w, "),\n")
 	}
+}
+
+func writeOpenTag(w io.Writer, name string) {
+	name = strings.ToLower(name)
+	ok := elementsMap[name]
+	if !ok {
+		fmt.Fprintf(w, "html.Element(%q, ", name)
+		return
+	}
+	fmt.Fprintf(w, "html.%s(", strings.Title(name))
+}
+
+func writeAttr(w io.Writer, a html.Attribute) {
+	name := strings.ToLower(a.Key)
+	ok := attributesMap[name]
+	if !ok {
+		if strings.HasPrefix(name, "data-") {
+			fmt.Fprintf(w, ".DataAttr(%q, %q)", name[5:], a.Val)
+			return
+		}
+		fmt.Fprintf(w, ".Attr(%q, %q)", name, a.Val)
+		return
+	}
+	fmt.Fprintf(w, ".%s(%q)", strings.Title(name), a.Val)
 }

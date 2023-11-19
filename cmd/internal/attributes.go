@@ -40,7 +40,7 @@ var Attributes = []Attribute{
 	{Name: "coords"},
 	{Name: "crossorigin"},
 	{Name: "data"},
-	// {Name: "data-*"}, // special case
+	// {Name: "data-*"}, // special case, see DataAttr()
 	{Name: "datetime"},
 	{Name: "decoding"},
 	{Name: "default"},
