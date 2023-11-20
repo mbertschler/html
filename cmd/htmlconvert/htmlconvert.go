@@ -1,35 +1,17 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/mbertschler/html/cmd/internal"
 	"golang.org/x/net/html"
 )
-
-var testInput = `<!DOCTYPE html>
-<html>
-	<head>
-		<title>Page Title</title>
-	</head>
-	<body>
-		<h1>This is a Heading</h1>
-		<p>This is a paragraph.</p>
-
-		<p data-test="yes">Links:</p>
-		<ul>
-			<li>
-				<a href="foo">Foo</a>
-			<li>
-				<a href="/bar/baz">BarBaz</a>
-		</ul>
-		<custom-element custom-attribute="a"></custom-element>
-	</body>
-</html>`
 
 var (
 	elementsMap   = map[string]bool{}
@@ -46,7 +28,19 @@ func initMaps() {
 }
 
 func main() {
-	doc, err := html.Parse(strings.NewReader(testInput))
+	flag.Parse()
+	args := flag.Args()
+	var input io.Reader
+	if len(args) > 0 {
+		input = strings.NewReader(strings.Join(args, " "))
+	} else {
+		input = os.Stdin
+		go func() {
+			time.Sleep(time.Second)
+			log.Println("waiting for input on stdin...")
+		}()
+	}
+	doc, err := html.Parse(input)
 	if err != nil {
 		log.Fatal(err)
 	}
